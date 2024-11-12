@@ -21,7 +21,5 @@ interface IRandomNumberGenerator {
     /// @notice Retrieves the random numbers for a given request
     /// @param requestId The ID of the request to get random numbers for
     /// @return uint256[] Array of random numbers generated for the request
-    function getRandomNumbers(
-        uint256 requestId
-    ) external view returns (uint256[] memory);
+    function getRandomNumbers(uint256 requestId) external view returns (uint256[] memory);
 }
