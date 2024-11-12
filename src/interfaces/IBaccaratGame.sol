@@ -7,10 +7,7 @@ interface IBaccaratGame {
     /// @notice Emitted when random number generator address is updated
     /// @param oldGenerator Previous random number generator address
     /// @param newGenerator New random number generator address
-    event RandomNumberGeneratorUpdated(
-        address indexed oldGenerator,
-        address indexed newGenerator
-    );
+    event RandomNumberGeneratorUpdated(address indexed oldGenerator, address indexed newGenerator);
 
     /// @notice Emitted when initial cards are received
     /// @param requestId The Chainlink VRF request ID
@@ -39,10 +36,7 @@ interface IBaccaratGame {
     ///      27-39: Clubs (A-K)
     ///      40-52: Spades (A-K)
     /// @dev Only callable by the registered random number generator
-    function receiveInitialCards(
-        uint256 requestId,
-        uint8[4] memory cards
-    ) external;
+    function receiveInitialCards(uint256 requestId, uint8[4] memory cards) external;
 
     /// @notice Callback function to receive potential third cards for player and/or banker
     /// @param requestId The Chainlink VRF request ID associated with these cards
@@ -50,10 +44,7 @@ interface IBaccaratGame {
     /// @dev Not all values in the cards array may be used, depending on the game rules
     ///      The game contract should determine which cards to use based on the current game state
     /// @dev Only callable by the registered random number generator
-    function receiveThirdCard(
-        uint256 requestId,
-        uint8[2] memory cards
-    ) external;
+    function receiveThirdCard(uint256 requestId, uint8[2] memory cards) external;
 
     /// @notice Sets or updates the random number generator address
     /// @param generator The address of the random number generator contract

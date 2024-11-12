@@ -26,11 +26,7 @@ contract BaccaratGameTest is Test {
     uint256 public constant PLAYER3_BET = 5 ether;
 
     // Events for testing
-    event BetPlaced(
-        address indexed player,
-        uint256 amount,
-        BaccaratGame.BetType betType
-    );
+    event BetPlaced(address indexed player, uint256 amount, BaccaratGame.BetType betType);
     event GameStarted();
     event GameEnded(BaccaratGame.BetType winner);
     event WinningsDistributed(address indexed winner, uint256 amount);
@@ -68,7 +64,7 @@ contract BaccaratGameTest is Test {
         // Verify bet was recorded
         BaccaratGame.Bet memory bet = game.getPlayerBet(player1);
         assertEq(bet.amount, PLAYER1_BET);
-        assertEq(uint(bet.betType), uint(BaccaratGame.BetType.PLAYER));
+        assertEq(uint256(bet.betType), uint256(BaccaratGame.BetType.PLAYER));
     }
 
     /// @notice Test prevention of double betting
@@ -120,35 +116,29 @@ contract BaccaratGameTest is Test {
         rng.fulfillAdditionalRequest(additionalCards);
 
         // Verify game state
-        assertEq(uint(game.getGameState()), uint(BaccaratGame.GameState.ENDED));
+        assertEq(uint256(game.getGameState()), uint256(BaccaratGame.GameState.ENDED));
     }
 
     /// @notice Test payout calculations for player bets
     /// @dev Verifies correct calculation of winnings for player bets
-    function testPayoutCalculation() public {
+    function testPayoutCalculation() public view {
         // Test player win payout
         uint256 betAmount = 1 ether;
         uint256 expectedWinnings = betAmount * 2; // 1:1 payout
 
-        uint256 calculatedWinnings = game.calculatePotentialWinnings(
-            BaccaratGame.BetType.PLAYER,
-            betAmount
-        );
+        uint256 calculatedWinnings = game.calculatePotentialWinnings(BaccaratGame.BetType.PLAYER, betAmount);
 
         assertEq(calculatedWinnings, expectedWinnings);
     }
 
     /// @notice Test banker commission calculations
     /// @dev Verifies correct calculation of banker bet winnings including commission
-    function testBankerCommission() public {
+    function testBankerCommission() public view {
         uint256 betAmount = 1 ether;
         uint256 commission = (betAmount * 5) / 100; // 5% commission
         uint256 expectedWinnings = (betAmount * 195) / 100 - commission;
 
-        uint256 calculatedWinnings = game.calculatePotentialWinnings(
-            BaccaratGame.BetType.BANKER,
-            betAmount
-        );
+        uint256 calculatedWinnings = game.calculatePotentialWinnings(BaccaratGame.BetType.BANKER, betAmount);
 
         assertEq(calculatedWinnings, expectedWinnings);
     }
@@ -162,10 +152,7 @@ contract BaccaratGameTest is Test {
         // Setup a game with known cards
         setupGameWithCards([8, 9, 7, 6]); // Player: 8,9 (7), Banker: 7,6 (3)
 
-        (
-            BaccaratGame.Hand memory playerHand,
-            BaccaratGame.Hand memory bankerHand
-        ) = game.getCurrentHands();
+        (BaccaratGame.Hand memory playerHand, BaccaratGame.Hand memory bankerHand) = game.getCurrentHands();
 
         assertEq(playerHand.value, 7); // 8+9 = 17 -> 7
         assertEq(bankerHand.value, 3); // 7+6 = 13 -> 3
@@ -218,10 +205,7 @@ contract BaccaratGameTest is Test {
 
         // Verify refund
         assertEq(player1.balance, initialBalance + PLAYER1_BET);
-        assertEq(
-            uint(game.getGameState()),
-            uint(BaccaratGame.GameState.BETTING)
-        );
+        assertEq(uint256(game.getGameState()), uint256(BaccaratGame.GameState.BETTING));
     }
 
     /// @notice Helper function to setup a game with predetermined cards

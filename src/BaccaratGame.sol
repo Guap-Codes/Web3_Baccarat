@@ -102,15 +102,10 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @param _betType The type of bet (PLAYER, BANKER, or TIE)
     /// @dev Requires minimum bet amount and checks various betting conditions
     /// @dev Emits BetPlaced event on success
-    function placeBet(
-        BetType _betType
-    ) external payable nonReentrant whenNotPaused {
+    function placeBet(BetType _betType) external payable nonReentrant whenNotPaused {
         require(currentState == GameState.BETTING, "Not in betting phase");
         require(block.timestamp < bettingDeadline, "Betting period has ended");
-        require(
-            msg.value >= MIN_BET && msg.value <= MAX_BET,
-            "Invalid bet amount"
-        );
+        require(msg.value >= MIN_BET && msg.value <= MAX_BET, "Invalid bet amount");
         require(bets[msg.sender].amount == 0, "Bet already placed");
 
         uint256 newTotalBets = totalBetsByType[_betType] + msg.value;
@@ -144,14 +139,8 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
         currentRequestId = randomNumberGenerator.requestRandomNumbers();
     }
 
-    function receiveInitialCards(
-        uint256 requestId,
-        uint8[4] memory cards
-    ) external {
-        require(
-            msg.sender == address(randomNumberGenerator),
-            "Only oracle can call"
-        );
+    function receiveInitialCards(uint256 requestId, uint8[4] memory cards) external {
+        require(msg.sender == address(randomNumberGenerator), "Only oracle can call");
         require(requestId == currentRequestId, "Invalid request ID");
         require(currentState == GameState.DEALING, "Not in dealing state");
 
@@ -182,11 +171,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
             let cardsSlot := add(hand.slot, 0) // First card starts at the struct's slot
 
             // Loop through each card in the hand
-            for {
-                let i := 0
-            } lt(i, numCards) {
-                i := add(i, 1)
-            } {
+            for { let i := 0 } lt(i, numCards) { i := add(i, 1) } {
                 let cardValue := sload(add(cardsSlot, i)) // Load card value
                 cardValue := mod(cardValue, 10) // Handle face cards (10,J,Q,K = 0)
                 total := add(total, cardValue)
@@ -239,14 +224,8 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @dev Implements complex Baccarat rules for third card drawing
     /// @dev If player's value <= 5, draws third card for player and potentially banker
     /// @dev If player stands and banker's value <= 5, draws third card for banker only
-    function receiveThirdCard(
-        uint256 requestId,
-        uint8[2] memory cards
-    ) external {
-        require(
-            msg.sender == address(randomNumberGenerator),
-            "Only oracle can call"
-        );
+    function receiveThirdCard(uint256 requestId, uint8[2] memory cards) external {
+        require(msg.sender == address(randomNumberGenerator), "Only oracle can call");
         require(requestId == currentRequestId, "Invalid request ID");
         require(currentState == GameState.DEALING, "Not in dealing state");
 
@@ -275,9 +254,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @notice Determines if banker should draw based on player's third card
     /// @param playerThirdCard The value of player's third card
     /// @return bool True if banker should draw
-    function shouldBankerDraw(
-        uint8 playerThirdCard
-    ) public view returns (bool) {
+    function shouldBankerDraw(uint8 playerThirdCard) public view returns (bool) {
         // Banker has natural - never draws
         if (bankerHand.value >= 7) return false;
 
@@ -318,7 +295,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
         // Record game history
         if (gameHistory.length >= MAX_HISTORY) {
             // Remove oldest result
-            for (uint i = 0; i < gameHistory.length - 1; i++) {
+            for (uint256 i = 0; i < gameHistory.length - 1; i++) {
                 gameHistory[i] = gameHistory[i + 1];
             }
             gameHistory.pop();
@@ -349,15 +326,12 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
         uint256[] memory winningAmounts = new uint256[](players.length);
 
         // Calculate winnings first
-        for (uint i = 0; i < players.length; i++) {
+        for (uint256 i = 0; i < players.length; i++) {
             address player = players[i];
             Bet memory playerBet = bets[player];
 
             if (playerBet.betType == winner) {
-                (uint256 winnings, uint256 commission) = calculateWinnings(
-                    playerBet.amount,
-                    winner
-                );
+                (uint256 winnings, uint256 commission) = calculateWinnings(playerBet.amount, winner);
                 winningAmounts[i] = winnings;
                 accumulatedCommission += commission; // Accumulate commission
             }
@@ -366,12 +340,9 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
         }
 
         // Perform transfers after all state changes
-        for (uint i = 0; i < players.length; i++) {
+        for (uint256 i = 0; i < players.length; i++) {
             if (winningAmounts[i] > 0) {
-                require(
-                    address(this).balance >= winningAmounts[i],
-                    "Insufficient contract balance"
-                );
+                require(address(this).balance >= winningAmounts[i], "Insufficient contract balance");
                 payable(players[i]).transfer(winningAmounts[i]);
                 emit WinningsDistributed(players[i], winningAmounts[i]);
             }
@@ -384,10 +355,11 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @return winnings The amount won in wei
     /// @return commission The house commission in wei (only for banker bets)
     /// @dev Uses assembly for gas optimization
-    function calculateWinnings(
-        uint256 amount,
-        BetType betType
-    ) private pure returns (uint256 winnings, uint256 commission) {
+    function calculateWinnings(uint256 amount, BetType betType)
+        private
+        pure
+        returns (uint256 winnings, uint256 commission)
+    {
         assembly {
             switch betType
             case 1 {
@@ -455,14 +427,11 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @dev Only callable by owner during betting phase
     /// @dev Resets game state after refunding all bets
     function cancelGame() external onlyOwner {
-        require(
-            currentState == GameState.BETTING,
-            "Can only cancel during betting"
-        );
+        require(currentState == GameState.BETTING, "Can only cancel during betting");
 
         // Refund all bets
         address[] memory players = getPlayers();
-        for (uint i = 0; i < players.length; i++) {
+        for (uint256 i = 0; i < players.length; i++) {
             address payable player = payable(players[i]);
             uint256 betAmount = bets[player].amount;
             if (betAmount > 0) {
@@ -486,11 +455,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @dev Only accessible after cards have been dealt
     /// @return Hand Player's hand
     /// @return Hand Banker's hand
-    function getCurrentHands()
-        external
-        view
-        returns (Hand memory, Hand memory)
-    {
+    function getCurrentHands() external view returns (Hand memory, Hand memory) {
         return (playerHand, bankerHand);
     }
 
@@ -517,9 +482,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @notice Checks if betting is currently open
     /// @return bool True if betting is open and deadline hasn't passed
     function isBettingOpen() public view returns (bool) {
-        return
-            currentState == GameState.BETTING &&
-            block.timestamp < bettingDeadline;
+        return currentState == GameState.BETTING && block.timestamp < bettingDeadline;
     }
 
     /// @notice Returns the remaining time for betting
@@ -538,11 +501,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @notice Returns the current total bets for each bet type
     /// @return uint256[3] Array of total bets [PLAYER, BANKER, TIE]
     function getCurrentBets() external view returns (uint256[3] memory) {
-        return [
-            totalBetsByType[BetType.PLAYER],
-            totalBetsByType[BetType.BANKER],
-            totalBetsByType[BetType.TIE]
-        ];
+        return [totalBetsByType[BetType.PLAYER], totalBetsByType[BetType.BANKER], totalBetsByType[BetType.TIE]];
     }
 
     /// @notice Calculates potential winnings for a bet amount and type
@@ -550,10 +509,7 @@ contract BaccaratGame is ReentrancyGuard, Ownable, Pausable {
     /// @param _amount The bet amount in wei
     /// @return uint256 Potential winnings in wei, including original bet
     /// @dev Includes commission calculation for banker bets
-    function calculatePotentialWinnings(
-        BetType _betType,
-        uint256 _amount
-    ) public pure returns (uint256) {
+    function calculatePotentialWinnings(BetType _betType, uint256 _amount) public pure returns (uint256) {
         uint256 potentialWinnings = _amount;
 
         if (_betType == BetType.BANKER) {

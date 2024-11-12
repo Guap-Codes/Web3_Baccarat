@@ -62,15 +62,8 @@ contract PlayerActions is Script {
 
     /// @notice Views the current cards in both Player and Banker hands
     /// @return Two uint8 arrays representing the Player's and Banker's hands respectively
-    function viewCurrentHands()
-        public
-        view
-        returns (uint8[] memory, uint8[] memory)
-    {
-        (
-            BaccaratGame.Hand memory playerHand,
-            BaccaratGame.Hand memory bankerHand
-        ) = game.getCurrentHands();
+    function viewCurrentHands() public view returns (uint8[] memory, uint8[] memory) {
+        (BaccaratGame.Hand memory playerHand, BaccaratGame.Hand memory bankerHand) = game.getCurrentHands();
 
         // Create arrays of the correct size based on number of cards in each hand
         uint8[] memory playerCards = new uint8[](playerHand.numCards);
@@ -100,20 +93,14 @@ contract PlayerActions is Script {
     /// @notice Gets potential winnings for a bet
     /// @param betType The type of bet
     /// @param amount The bet amount
-    function getPotentialWinnings(
-        BaccaratGame.BetType betType,
-        uint256 amount
-    ) public view returns (uint256) {
+    function getPotentialWinnings(BaccaratGame.BetType betType, uint256 amount) public view returns (uint256) {
         return game.calculatePotentialWinnings(betType, amount);
     }
 
     /// @notice Places a bet with validation
     /// @param betType The type of bet
     /// @param amount The amount to bet in ether
-    function placeBetWithValidation(
-        BaccaratGame.BetType betType,
-        uint256 amount
-    ) public {
+    function placeBetWithValidation(BaccaratGame.BetType betType, uint256 amount) public {
         require(game.isBettingOpen(), "Betting is not open");
         (uint256 minBet, uint256 maxBet) = game.getBetLimits();
         require(amount >= minBet && amount <= maxBet, "Invalid bet amount");

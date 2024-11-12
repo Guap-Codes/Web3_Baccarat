@@ -49,18 +49,14 @@ contract MockRandomNumberGenerator is IRandomNumberGenerator {
     /// @notice Checks if a random number request has been fulfilled
     /// @param requestId The ID of the request to check
     /// @return bool True if the request has been fulfilled
-    function isRequestFulfilled(
-        uint256 requestId
-    ) external view returns (bool) {
+    function isRequestFulfilled(uint256 requestId) external view returns (bool) {
         return fulfilled[requestId];
     }
 
     /// @notice Gets random numbers for a specific request
     /// @param requestId The ID of the request
     /// @return randomWords Array of random numbers
-    function getRandomNumbers(
-        uint256 requestId
-    ) external view returns (uint256[] memory) {
+    function getRandomNumbers(uint256 requestId) external view returns (uint256[] memory) {
         require(fulfilled[requestId], "Request not fulfilled");
         uint256[] memory randomWords = new uint256[](4); // Default to 4 cards
         // Mock implementation - return dummy values
