@@ -180,7 +180,6 @@ contract BaccaratGameTest is Test {
         assertFalse(game.shouldBankerDraw(3)); // Banker should not draw with 5 when player's third card is 3
     }
 
- 
     /// @notice Test emergency pause functionality
     /// @dev Verifies the contract can be paused and operations are blocked while paused
     function testEmergencyPause() public {
