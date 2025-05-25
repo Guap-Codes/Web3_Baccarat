@@ -180,28 +180,7 @@ contract BaccaratGameTest is Test {
         assertFalse(game.shouldBankerDraw(3)); // Banker should not draw with 5 when player's third card is 3
     }
 
-    /*
-    /// @notice Test third card drawing rules
-    /// @dev Verifies correct implementation of Baccarat third card rules
-    function testThirdCardRules() public {
-        // First scenario - test when player needs third card
-        setupGameWithCards([2, 3, 4, 5]); // Player: 5, Banker: 9
-        assertTrue(game.needsThirdCard());
-
-        // Complete the current game by providing the additional cards
-        uint8[2] memory additionalCards = [5, 6];
-        rng.fulfillAdditionalRequest(additionalCards);
-
-        // Reset game state for second scenario
-        vm.prank(owner);
-        game.startNewGame();
-
-        // Second scenario - test banker drawing rules
-        setupGameWithCards([7, 8, 2, 3]); // Player: 5, Banker: 5
-        assertTrue(game.shouldBankerDraw(6)); // Banker should draw with 5 when player's third card is 6
-        assertFalse(game.shouldBankerDraw(3)); // Banker should not draw with 5 when player's third card is 3
-    }*/
-
+ 
     /// @notice Test emergency pause functionality
     /// @dev Verifies the contract can be paused and operations are blocked while paused
     function testEmergencyPause() public {
